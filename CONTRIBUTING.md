@@ -45,3 +45,28 @@ To ensure consistent code formatting across the project:
 Adhering to these formatting guidelines helps maintain code consistency and makes the review process smoother.
 
 Thank you for contributing to Meshtastic!
+
+# build notes:
+## Prep env:
+python -m venv venv
+source env/bin/activate
+pip install --upgrade pip
+### https://docs.platformio.org/en/latest/core/userguide/index.html#commands
+pip install platformio
+## Install trunk
+### https://docs.trunk.io/code-quality/setup-and-installation/deal-with-existing-issues
+curl https://get.trunk.io -fsSL | bash
+trunk init
+## Run linters
+trunk check ./path
+## Auto-apply linters
+trunk fmt ./path
+
+## run unit tests:
+pio test -e coverage
+
+## Build natively:
+./bin/build-native.sh
+
+## Build binaries:
+./bin/build-nrf52.sh rak4631
