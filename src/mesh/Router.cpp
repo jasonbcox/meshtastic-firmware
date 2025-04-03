@@ -358,10 +358,12 @@ DecodeState perhapsDecode(meshtastic_MeshPacket *p)
         nodeDB->getMeshNode(p->from)->user.public_key.size > 0 && nodeDB->getMeshNode(p->to)->user.public_key.size > 0 &&
         rawSize > MESHTASTIC_PKC_OVERHEAD) {
         LOG_DEBUG("Attempt PKI decryption");
+        uint32_t start = millis();
 
         if (crypto->decryptCurve25519(p->from, nodeDB->getMeshNode(p->from)->user.public_key, p->id, rawSize, p->encrypted.bytes,
                                       bytes)) {
             LOG_INFO("PKI Decryption worked!");
+            LOG_DEBUG("PKC DECRYPT FINISHED: %ums", millis() - start);
 
             meshtastic_Data decodedtmp;
             memset(&decodedtmp, 0, sizeof(decodedtmp));
@@ -544,7 +546,9 @@ meshtastic_Routing_Error perhapsEncode(meshtastic_MeshPacket *p)
                          *node->user.public_key.bytes);
                 return meshtastic_Routing_Error_PKI_FAILED;
             }
+            uint32_t start = millis();
             crypto->encryptCurve25519(p->to, getFrom(p), node->user.public_key, p->id, numbytes, bytes, p->encrypted.bytes);
+            LOG_DEBUG("PKC ENCRYPT FINISHED: %ums", millis() - start);
             numbytes += MESHTASTIC_PKC_OVERHEAD;
             p->channel = 0;
             p->pki_encrypted = true;
@@ -600,6 +604,7 @@ NodeNum Router::getNodeNum()
  */
 void Router::handleReceived(meshtastic_MeshPacket *p, RxSource src)
 {
+    uint32_t start = millis();
     bool skipHandle = false;
     // Also, we should set the time from the ISR and it should have msec level resolution
     p->rx_time = getValidTime(RTCQualityFromNet); // store the arrival timestamp for the phone
@@ -667,6 +672,7 @@ void Router::handleReceived(meshtastic_MeshPacket *p, RxSource src)
     }
 
     packetPool.release(p_encrypted); // Release the encrypted packet
+    LOG_DEBUG("HANDLE PACKET FINISHED: %ums", millis() - start);
 }
 
 void Router::perhapsHandleReceived(meshtastic_MeshPacket *p)

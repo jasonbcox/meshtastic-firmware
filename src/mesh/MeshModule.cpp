@@ -142,7 +142,9 @@ void MeshModule::callModules(meshtastic_MeshPacket &mp, RxSource src)
                 } else
                     printPacket("packet on wrong channel, but can't respond", &mp);
             } else {
+                uint32_t start = millis();
                 ProcessMessage handled = pi.handleReceived(mp);
+                LOG_DEBUG("MODULE %s FINISHED PROCESSING PACKET: %ums", pi.name, millis() - start);
 
                 pi.alterReceived(mp);
 
